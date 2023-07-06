@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Outrun the Blob: Normal Edition</title>
+  <link rel="icon"href="GUN.png">
+  <style>
+  canvas {
+    border: 2px dashed #000;
+  }
+  button {
+    width:75px;
+    height:75px;
+    border-radius: 500%;
+    background-color: #f00;
+    color: #fff;
+  }
+  button:hover {
+    cursor: pointer;
+  }
+  .good {
+    background-color: #0f0;
+  }
+  .hide {
+    display: none;
+  }
+  </style>
+</head>
+<body onload="startGame()">
+  <script>
+  var gamePiece;
+  var bad=[];
+  var lifeTxt;
+  var score;
+  var xdif;
+  var ydif;
+  var lengthy;
+  var keysPressed=[];
+  var borderLeft;
+  var borderTop;
+  var borderRight;
+  var borderBottom;
+  var otherLeft;
+  var otherTop;
+  var otherRight;
+  var otherBottom;
+  var lives=5;
+  var bullets=[];
+  var dirX=[];
+  var dirY=[];
+  var killedBullets=[];
+  var hiscore=0;
+  var hiscoreTxt;
+  var resetvar=0;
+  function startGame(){
+    window.onstorage = function(){
+      window.localStorage.setItem("hiscore", hiscore);
+      window.localStorage.setItem("banStartEnd", new Date().getDate()-1);
+      if(Number(window.localStorage.getItem("banStartEnd"))==0){
+        window.localStorage.setItem("banStartEnd", 31);
+      }
+      window.location.replace("https://intranet.ormiston.qld.edu.au/start");
+    }
+    if(!(window.localStorage.getItem("hiscore"))){
+      window.localStorage.setItem("hiscore", hiscore);
+    }
+    if(!(window.localStorage.getItem("banStartEnd"))){
+      hiscore=window.localStorage.getItem("hiscore");
+      gamePiece=new component(51,51,"Good.png",0,0, "image");
+      lifeTxt=new component("30px", "Comic Sans MS", "rgb(127,127,127)", 40, 40, "text");
+      score=new component("30px", "Comic Sans MS", "rgb(127,127,127)", 40, 80, "text");
+      hiscoreTxt=new component("30px", "Comic Sans MS", "rgb(127,127,127)", 40, 120, "text");
+      bad.push(new component(51,51,"Evil.png",1149,549,"image"));
+      gameArea.start();
+    } else if (new Date().getDate()>Number(window.localStorage.getItem("banStartEnd"))||new Date().getDate()<Number(window.localStorage.getItem("banStartEnd"))){
+      window.location.replace("https://intranet.ormiston.qld.edu.au/start");
+    } else {
+      window.localStorage.removeItem("banStartEnd");
+      startGame();
+    }
+  }
+  function component(width,height,colour,x,y,type){
+    this.type=type;
+    if (this.type=="image"){
+      this.image=new Image();
+      this.image.src=colour;
+    }
+    this.width=width;
+    this.height=height;
+    this.x=x;
+    this.y=y;
+    this.update = function(){
+      ctx = gameArea.context;
+      if (this.type=="text"){
+        ctx.font=this.width+" "+this.height;
+        ctx.fillStyle=colour;
+        ctx.fillText(this.text,this.x,this.y);
+      } else if (this.type=="image"){
+        ctx.drawImage(this.image,this.x,this.y,this.width,this.height);
+      } else {
+        ctx.fillStyle = colour;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+    }
+  }
+  var gameArea={
+    canvas:document.createElement("canvas"),
+    start:function(){
+      this.canvas.width = 1200;
+      this.canvas.height = 600;
+      this.context = this.canvas.getContext("2d");
+      document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+      this.frameNo=0;
+      this.interval = setInterval(updateGameArea, 1);
+      window.addEventListener("keydown", function(e){
+        keysPressed[e.keyCode]=true;
+      });
+      window.addEventListener("keyup", function(e){
+          keysPressed[e.keyCode]=false;
+      });
+    },
+    clear:function(){
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    stop:function(){
+      gameArea.clear();
+      if(bad.length>hiscore){
+        window.localStorage.setItem("hiscore", bad.length);
+        hiscore=bad.length;
+      }
+      bullets=[];
+      bad=[];
+      lives=5;
+      keysPressed=[];
+      dirX=[];
+      dirY=[];
+      clearInterval(this.interval);
+      startGame();
+    }
+  }
+  function updateGameArea(){
+    gameArea.clear();
+    gameArea.frameNo+=1;
+    score.text="Score: "+bad.length;
+    score.update();
+    lifeTxt.text="Lives: "+Math.ceil(lives);
+    lifeTxt.update();
+    hiscoreTxt.text="Hiscore: "+hiscore;
+    hiscoreTxt.update();
+    if(gameArea.frameNo%100==0){
+      bad.push(new component(51,51,"Evil.png",Math.floor(Math.random()*1149),Math.floor(Math.random()*549),"image"));
+      lives++;
+    }
+    for(i=0;i<bad.length;i++){
+      xdif=gamePiece.x-bad[i].x;
+      ydif=gamePiece.y-bad[i].y;
+      lengthy=Math.sqrt(xdif*xdif+ydif*ydif);
+      bad[i].x+=xdif/lengthy*(Math.ceil(bad.length/10)*0.1);
+      bad[i].y+=ydif/lengthy*(Math.ceil(bad.length/10)*0.1);
+      bad[i].update();
+      borderLeft=gamePiece.x;
+      borderTop=gamePiece.y;
+      borderRight=gamePiece.x+(gamePiece.width);
+      borderBottom=gamePiece.y+(gamePiece.height);
+      otherLeft=bad[i].x;
+      otherTop=bad[i].y;
+      otherRight=bad[i].x+(bad[i].width);
+      otherBottom=bad[i].y+(bad[i].height);
+      if((otherLeft>borderLeft&&otherLeft<borderRight&&otherTop>borderTop&&otherTop<borderBottom)||(otherRight<borderRight&&otherRight>borderLeft&&otherTop>borderTop&&otherTop<borderBottom)||(otherLeft>borderLeft&&otherLeft<borderRight&&otherBottom<borderBottom&&otherBottom>borderTop)||(otherRight<borderRight&&otherRight>borderLeft&&otherBottom<borderBottom&&otherBottom>borderTop)){
+        lives--;
+        bad[i].x=Math.floor(Math.random()*1149);
+        bad[i].y=Math.floor(Math.random()*549);
+        if(lives<=0){
+          gameArea.stop();
+        }
+      }
+    }
+    if(gameArea.frameNo%100==0){
+      for(i=0;i<bad.length;i++){
+        bullets.push(new component(5,5,"#f00",bad[i].x,bad[i].y))
+        dirX.push((gamePiece.x-bad[i].x)/Math.sqrt((gamePiece.x-bad[i].x)*(gamePiece.x-bad[i].x)+(gamePiece.y-bad[i].y)*(gamePiece.y-bad[i].y))*2);
+        dirY.push((gamePiece.y-bad[i].y)/Math.sqrt((gamePiece.x-bad[i].x)*(gamePiece.x-bad[i].x)+(gamePiece.y-bad[i].y)*(gamePiece.y-bad[i].y))*2);
+      }
+    }
+    for(i=0;i<bullets.length;i++){
+      bullets[i].x+=dirX[i];
+      bullets[i].y+=dirY[i];
+      bullets[i].update();
+      borderLeft=gamePiece.x;
+      borderTop=gamePiece.y;
+      borderRight=gamePiece.x+(gamePiece.width);
+      borderBottom=gamePiece.y+(gamePiece.height);
+      otherLeft=bullets[i].x;
+      otherTop=bullets[i].y;
+      otherRight=bullets[i].x+(bullets[i].width);
+      otherBottom=bullets[i].y+(bullets[i].height);
+      if((otherLeft>borderLeft&&otherLeft<borderRight&&otherTop>borderTop&&otherTop<borderBottom)||(otherRight<borderRight&&otherRight>borderLeft&&otherTop>borderTop&&otherTop<borderBottom)||(otherLeft>borderLeft&&otherLeft<borderRight&&otherBottom<borderBottom&&otherBottom>borderTop)||(otherRight<borderRight&&otherRight>borderLeft&&otherBottom<borderBottom&&otherBottom>borderTop)){
+        lives-=1/bullets.length;
+        killedBullets.push(i)
+        if(lives<=0){
+          gameArea.stop();
+        }
+      } else if(bullets[i].x<0||bullets[i].x>1195||bullets[i].y<0||bullets[i].y>595){
+        killedBullets.push(i);
+      }
+    }
+    for(i=0;i<killedBullets.length;i++){
+      bullets.splice(killedBullets[i], 1);
+      dirX.splice(killedBullets[i], 1);
+      dirY.splice(killedBullets[i], 1);
+    }
+    killedBullets=[];
+    if(keysPressed[37]||keysPressed[65]){
+      gamePiece.x-=(Math.ceil(bad.length/9)*0.1);
+    }
+    if(keysPressed[38]||keysPressed[87]){
+      gamePiece.y-=(Math.ceil(bad.length/9)*0.1);
+    }
+    if(keysPressed[39]||keysPressed[68]){
+      gamePiece.x+=(Math.ceil(bad.length/9)*0.1);
+    }
+    if(keysPressed[40]||keysPressed[83]){
+      gamePiece.y+=(Math.ceil(bad.length/9)*0.1);
+    }
+    gamePiece.update();
+    if(gamePiece.x>1149){
+      gamePiece.x=1149
+      gamePiece.update();
+    }
+    if(gamePiece.x<0){
+      gamePiece.x=0;
+      gamePiece.update();
+    }
+    if(gamePiece.y>549){
+      gamePiece.y=549;
+      gamePiece.update();
+    }
+    if(gamePiece.y<0){
+      gamePiece.y=0;
+      gamePiece.update();
+    }
+  }
+  function reset(){
+    if(resetvar==0){
+      resetbut.textContent="YES";
+      noReset.classList.remove("hide");
+      resetvar++;
+    } else {
+      resetvar=0;
+      window.localStorage.setItem("hiscore", 0)
+      location.reload();
+    }
+  }
+  function noreset(){
+    resetvar=0;
+    noReset.classList.add("hide");
+    resetbut.textContent="RESET";
+  }
+  </script>
+  <button id="resetbut"onclick="reset()">RESET</button>
+  <button id="noReset"class="good hide"onclick="noreset()">NO</button>
+</body>
+</html>

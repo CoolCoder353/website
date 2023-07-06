@@ -1,0 +1,104 @@
+:root {
+	--tabStatic: #3e92cc ;
+	--tabSelected: #64cea5;
+}
+
+body {
+	background: #fffaff;
+}
+
+.title {
+	font-family: Brush Script MT;
+}
+
+a:link {
+	color: black;
+	text-decoration: none;
+}
+
+a:visited {
+	color: black;
+	text-decoration: none;
+}
+
+a:hover {
+	color: black;
+	text-decoration: none;
+}
+
+a:active {
+	color: black;
+	text-decoration: none;
+}
+
+.ThumbNail {
+	width: auto;
+	height: auto;
+}
+
+.account {
+	float: left;
+}
+
+.tab{
+	overflow: hidden;
+  border: none;
+	background-color: var(--tabStatic);
+}
+/* Style the buttons that are used to open the tab content */
+
+.tab button {
+  display: inline-block;
+	background-color: var(--tabStatic);
+	float: left;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	padding: 14px 10px;
+	transition: 0.3s;
+	width: auto;
+	height: 10px;
+	line-height: 0px;
+	display: inline-block;
+	text-align: center;
+}
+
+
+/* Change background color of buttons on hover */
+
+.tab button:hover {
+	border: none;
+	background-color: var(--tabSelected);
+}
+
+
+/* Create an active/current tablink class */
+
+.tab button.active {
+		border:none;
+		background-color: var(--tabSelected);
+}
+
+
+/* Style the tab content */
+
+.tabcontent {
+	display: none;
+	padding: 6px 12px;
+	border: inherit;
+	border-top: none;
+	animation: fadeInEffect 1.5s;
+	/* Fading effect takes 1 second */
+}
+
+
+/* Go from zero to full opacity */
+
+@keyframes fadeInEffect {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}

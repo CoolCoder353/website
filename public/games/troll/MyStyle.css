@@ -1,0 +1,26 @@
+div {
+	overflow-x: hidden;
+	overflow-y: hidden;
+
+	-webkit-user-select: none;
+	/* Safari */
+	-ms-user-select: none;
+	/* IE 10 and IE 11 */
+	user-select: none;
+	/* Standard syntax */
+}
+
+body {
+	-webkit-user-select: none;
+	/* Safari */
+	-ms-user-select: none;
+	/* IE 10 and IE 11 */
+	user-select: none;
+	/* Standard syntax */
+	overflow-x: hidden;
+	overflow-y: hidden;
+	/*font: 24px Helvetica; */
+	position: fixed;
+	padding: 0;
+	margin: 0;
+}
